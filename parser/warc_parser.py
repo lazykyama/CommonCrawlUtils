@@ -16,6 +16,13 @@ class EncodingDetectionError(Exception):
   def __str__(self):
     return self._msg
 
+class DecodingFailureError(Exception):
+  def __init__(self, msg):
+    Exception.__init__(self)
+    self._msg = msg
+  def __str__(self):
+    return self._msg
+
 class WetEntry(object):
     def __init__(self, block, headerkey_case_sensitive=True):
         header_tail_index = block.find(2*LINE_DELIMITER) + len(LINE_DELIMITER)
@@ -71,7 +78,8 @@ class WetEntry(object):
         except:
             logging.error('fail to decode: detected encoding={}, conf={}'.format(
                 self._encoding, detection['confidence']))
-            raise
+            raise DecodingFailureError('encoding:{}, partial block: {}'.format(
+                self._encoding, body_block[:20]))
 
 class Parser(object):
     def __init__(self):
@@ -106,7 +114,7 @@ class Parser(object):
                             headerkey_case_sensitive=headerkey_case_sensitive)
                         yield entry
                         self._loaded_counter += 1
-                    except EncodingDetectionError as e: 
+                    except (EncodingDetectionError, DecodingFailureError) as e: 
                         logging.warn('{}'.format(e))
                         self._skip_counter += 1
                     finally:
@@ -118,7 +126,7 @@ class Parser(object):
                     headerkey_case_sensitive=headerkey_case_sensitive)
                 yield entry
                 self._loaded_counter += 1
-            except EncodingDetectionError as e: 
+            except (EncodingDetectionError, DecodingFailureError) as e: 
                 logging.warn('{}'.format(e))
                 self._skip_counter += 1
             finally:
