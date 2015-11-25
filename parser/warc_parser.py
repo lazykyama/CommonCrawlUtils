@@ -1,9 +1,6 @@
 # -*- coding: utf-8-unix -*-
 
-import sys
-import mmap
 import gzip
-
 import logging
 
 import chardet
