@@ -66,7 +66,12 @@ class WetEntry(object):
                 'low confidence encoding detection: {}'.format(detection['encoding']))
 
         self._encoding = detection['encoding']
-        return body_block.decode(self._encoding)
+        try:
+            return body_block.decode(self._encoding)
+        except:
+            logging.error('fail to decode: detected encoding={}, conf={}'.format(
+                self._encoding, detection['confidence']))
+            raise
 
 class Parser(object):
     def __init__(self):
